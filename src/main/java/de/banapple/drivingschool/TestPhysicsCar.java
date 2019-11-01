@@ -64,6 +64,8 @@ public class TestPhysicsCar
 
     private Node vehicleNode;
 
+    private CameraNode camNode;
+
     public static void main(String[] args) {
 
         AppSettings settings = new AppSettings(true);
@@ -86,24 +88,33 @@ public class TestPhysicsCar
         setupKeys();
         buildPlayer();
 
+        useChaseNode();
+    }
+
+    void useChaseNode() {
+
         // Disable the default flyby cam
         flyCam.setEnabled(false);
         // create the camera Node
-        CameraNode camNode = new CameraNode("Camera Node", cam);
+        camNode = new CameraNode("Camera Node", cam);
         // This mode means that camera copies the movements of the target:
         camNode.setControlDir(ControlDirection.SpatialToCamera);
         // Attach the camNode to the target:
         vehicleNode.attachChild(camNode);
         // Move camNode, e.g. behind and above the target:
-        camNode.setLocalTranslation(new Vector3f(0, 2, -5));
+        setCamPositionChase();
         // Rotate the camNode to look at the target:
         camNode.lookAt(vehicleNode.getLocalTranslation(), Vector3f.UNIT_Y);
-        // // Disable the default flyby cam
-        // flyCam.setEnabled(false);
-        // // Enable a chase cam for this target (typically the player).
-        // ChaseCamera chaseCam = new ChaseCamera(cam, vehicleNode,
-        // inputManager);
-        // chaseCam.setSmoothMotion(false);
+    }
+
+    void useChaseCamera() {
+
+        // Disable the default flyby cam
+        flyCam.setEnabled(false);
+        // Enable a chase cam for this target (typically the player).
+        ChaseCamera chaseCam = new ChaseCamera(cam, vehicleNode,
+                inputManager);
+        chaseCam.setSmoothMotion(false);
     }
 
     private PhysicsSpace getPhysicsSpace() {
@@ -141,6 +152,11 @@ public class TestPhysicsCar
         inputManager.addMapping("Downs", new KeyTrigger(KeyInput.KEY_J));
         inputManager.addMapping("Space", new KeyTrigger(KeyInput.KEY_SPACE));
         inputManager.addMapping("Reset", new KeyTrigger(KeyInput.KEY_RETURN));
+
+        inputManager.addMapping("Cam1", new KeyTrigger(KeyInput.KEY_1));
+        inputManager.addMapping("Cam2", new KeyTrigger(KeyInput.KEY_2));
+        inputManager.addListener(this, "Cam1", "Cam2");
+
         inputManager.addListener(this, "Lefts");
         inputManager.addListener(this, "Rights");
         inputManager.addListener(this, "Ups");
@@ -230,7 +246,7 @@ public class TestPhysicsCar
 
         /* reduce rolling */
         for (int wheel = 0; wheel < vehicle.getNumWheels(); wheel++) {
-            vehicle.setRollInfluence(wheel, 0.2f);
+            vehicle.setRollInfluence(wheel, 0.3f);
         }
 
         getPhysicsSpace().add(vehicle);
@@ -244,8 +260,6 @@ public class TestPhysicsCar
 
     public void onAction(String binding, boolean value, float tpf) {
 
-        log.info("binding=" + binding + ", value=" + value + ", tpf=" + tpf);
-
         if (binding.equals("Space")) {
             if (value) {
                 vehicle.applyImpulse(jumpForce, Vector3f.ZERO);
@@ -258,9 +272,22 @@ public class TestPhysicsCar
                 vehicle.setLinearVelocity(Vector3f.ZERO);
                 vehicle.setAngularVelocity(Vector3f.ZERO);
                 vehicle.resetSuspension();
-            } else {
             }
+        } else if ("Cam1".equals(binding) && value) {
+            setCamPositionChase();
+        } else if ("Cam2".equals(binding) && value) {
+            setCamPositionDriver();
         }
+    }
+
+    private void setCamPositionDriver() {
+
+        camNode.setLocalTranslation(new Vector3f(0.4f, 1.5f, -0.5f));
+    }
+
+    private void setCamPositionChase() {
+
+        camNode.setLocalTranslation(new Vector3f(0, 2, -5));
     }
 
     @Override
@@ -279,7 +306,6 @@ public class TestPhysicsCar
         } else if (binding.equals("Downs")) {
             vehicle.accelerate(0.0f);
             float brakeValue = brakeForce * value / tpf;
-            log.info("brakeValue=" + brakeValue);
             vehicle.brake(brakeValue);
         } else {
             vehicle.brake(0.0f);
