@@ -107,6 +107,7 @@ public class PhysicsTestHelper {
         rootNode.attachChild(sphereGeometry);
         space.add(sphereGeometry);
 
+        
     }
 
     public static void createPhysicsTestWorldSoccer(Node rootNode, AssetManager assetManager, PhysicsSpace space) {

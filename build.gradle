@@ -39,7 +39,7 @@ dependencies {
 
 task run(dependsOn: 'build', type:JavaExec) {
     description = 'Run the DrivingSchool'
-    main = 'de.banapple.drivingschool.DrivingSchool'
+    main = 'de.banapple.drivingschool.TestPhysicsCar'
     classpath = sourceSets.main.runtimeClasspath
 }
 

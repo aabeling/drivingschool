@@ -35,22 +35,17 @@ package de.banapple.drivingschool;
 import java.util.*;
 import java.util.logging.*;
 
-import com.jme3.app.SimpleApplication;
-import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.PhysicsSpace;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.control.VehicleControl;
+import com.jme3.app.*;
+import com.jme3.bullet.*;
+import com.jme3.bullet.collision.shapes.*;
+import com.jme3.bullet.control.*;
 import com.jme3.input.*;
 import com.jme3.input.controls.*;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
-import com.jme3.math.FastMath;
-import com.jme3.math.Matrix3f;
-import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Node;
-import com.jme3.scene.shape.Cylinder;
+import com.jme3.material.*;
+import com.jme3.math.*;
+import com.jme3.scene.*;
+import com.jme3.scene.control.CameraControl.*;
+import com.jme3.scene.shape.*;
 import com.jme3.system.*;
 
 public class TestPhysicsCar
@@ -67,6 +62,8 @@ public class TestPhysicsCar
     private float accelerationValue = 0;
     private Vector3f jumpForce = new Vector3f(0, 3000, 0);
 
+    private Node vehicleNode;
+
     public static void main(String[] args) {
 
         AppSettings settings = new AppSettings(true);
@@ -81,12 +78,32 @@ public class TestPhysicsCar
 
     @Override
     public void simpleInitApp() {
+
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         bulletAppState.setDebugEnabled(true);
         PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
         setupKeys();
         buildPlayer();
+
+        // Disable the default flyby cam
+        flyCam.setEnabled(false);
+        // create the camera Node
+        CameraNode camNode = new CameraNode("Camera Node", cam);
+        // This mode means that camera copies the movements of the target:
+        camNode.setControlDir(ControlDirection.SpatialToCamera);
+        // Attach the camNode to the target:
+        vehicleNode.attachChild(camNode);
+        // Move camNode, e.g. behind and above the target:
+        camNode.setLocalTranslation(new Vector3f(0, 2, -5));
+        // Rotate the camNode to look at the target:
+        camNode.lookAt(vehicleNode.getLocalTranslation(), Vector3f.UNIT_Y);
+        // // Disable the default flyby cam
+        // flyCam.setEnabled(false);
+        // // Enable a chase cam for this target (typically the player).
+        // ChaseCamera chaseCam = new ChaseCamera(cam, vehicleNode,
+        // inputManager);
+        // chaseCam.setSmoothMotion(false);
     }
 
     private PhysicsSpace getPhysicsSpace() {
@@ -146,7 +163,7 @@ public class TestPhysicsCar
         compoundShape.addChildShape(box, new Vector3f(0, 1, 0));
 
         // create vehicle node
-        Node vehicleNode = new Node("vehicleNode");
+        vehicleNode = new Node("vehicleNode");
         vehicle = new VehicleControl(compoundShape, 400);
         vehicleNode.addControl(vehicle);
 
@@ -160,7 +177,7 @@ public class TestPhysicsCar
         vehicle.setSuspensionDamping(dampValue * 2.0f * FastMath.sqrt(stiffness));
         vehicle.setSuspensionStiffness(stiffness);
         vehicle.setMaxSuspensionForce(10000.0f);
-        
+
         // Create four wheels and add them at their locations
         Vector3f wheelDirection = new Vector3f(0, -1, 0); // was 0, -1, 0
         Vector3f wheelAxle = new Vector3f(-1, 0, 0); // was -1, 0, 0
@@ -211,16 +228,17 @@ public class TestPhysicsCar
         vehicleNode.attachChild(node4);
         rootNode.attachChild(vehicleNode);
 
-        /* no rolling */
-        for (int wheel = 0;wheel<vehicle.getNumWheels();wheel++) {
-            vehicle.setRollInfluence(wheel, 0);
+        /* reduce rolling */
+        for (int wheel = 0; wheel < vehicle.getNumWheels(); wheel++) {
+            vehicle.setRollInfluence(wheel, 0.2f);
         }
-        
+
         getPhysicsSpace().add(vehicle);
     }
 
     @Override
     public void simpleUpdate(float tpf) {
+
         cam.lookAt(vehicle.getPhysicsLocation(), Vector3f.UNIT_Y);
     }
 
