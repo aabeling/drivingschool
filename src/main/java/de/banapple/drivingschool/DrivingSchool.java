@@ -7,6 +7,7 @@ import com.jme3.material.*;
 import com.jme3.math.*;
 import com.jme3.scene.*;
 import com.jme3.scene.shape.*;
+import com.jme3.system.*;
 
 /**
  * Sample 1 - how to get started with the most simple JME 3 application. Display
@@ -16,7 +17,13 @@ import com.jme3.scene.shape.*;
 public class DrivingSchool extends SimpleApplication {
 
     public static void main(String[] args) {
+        
+        AppSettings settings = new AppSettings(true);
+        settings.setResolution(1280,960);
+        
         DrivingSchool app = new DrivingSchool();
+        app.setSettings(settings);
+        app.setShowSettings(false);
         app.start(); // start the game
     }
 
