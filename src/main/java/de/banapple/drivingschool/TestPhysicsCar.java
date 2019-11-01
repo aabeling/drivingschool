@@ -32,15 +32,17 @@
 
 package de.banapple.drivingschool;
 
+import java.util.*;
+import java.util.logging.*;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
 import com.jme3.bullet.control.VehicleControl;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.*;
+import com.jme3.input.controls.*;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
@@ -49,8 +51,13 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Cylinder;
+import com.jme3.system.*;
 
-public class TestPhysicsCar extends SimpleApplication implements ActionListener {
+public class TestPhysicsCar
+        extends SimpleApplication
+        implements ActionListener, AnalogListener {
+
+    private static final Logger log = Logger.getLogger(TestPhysicsCar.class.getName());
 
     private BulletAppState bulletAppState;
     private VehicleControl vehicle;
@@ -61,7 +68,14 @@ public class TestPhysicsCar extends SimpleApplication implements ActionListener 
     private Vector3f jumpForce = new Vector3f(0, 3000, 0);
 
     public static void main(String[] args) {
+
+        AppSettings settings = new AppSettings(true);
+        settings.setResolution(1280, 768);
+        settings.setUseJoysticks(true);
+
         TestPhysicsCar app = new TestPhysicsCar();
+        app.setSettings(settings);
+        app.setShowSettings(false);
         app.start();
     }
 
@@ -80,6 +94,30 @@ public class TestPhysicsCar extends SimpleApplication implements ActionListener 
     }
 
     private void setupKeys() {
+
+        Joystick[] joysticks = inputManager.getJoysticks();
+        if (joysticks == null) {
+            throw new IllegalStateException("Cannot find any joysticks!");
+        }
+        Arrays.asList(joysticks).forEach(j -> System.out.println(j));
+        if (joysticks.length != 1) {
+            throw new IllegalStateException("more than one joystick");
+        }
+        Joystick joystick = joysticks[0];
+
+        inputManager.addMapping("Lefts", new JoyAxisTrigger(
+                joystick.getJoyId(),
+                joystick.getXAxisIndex(), true));
+        inputManager.addMapping("Rights", new JoyAxisTrigger(
+                joystick.getJoyId(),
+                joystick.getXAxisIndex(), false));
+        inputManager.addMapping("Ups", new JoyAxisTrigger(
+                joystick.getJoyId(),
+                joystick.getYAxisIndex(), true));
+        inputManager.addMapping("Downs", new JoyAxisTrigger(
+                joystick.getJoyId(),
+                joystick.getYAxisIndex(), false));
+
         inputManager.addMapping("Lefts", new KeyTrigger(KeyInput.KEY_H));
         inputManager.addMapping("Rights", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("Ups", new KeyTrigger(KeyInput.KEY_U));
@@ -132,7 +170,8 @@ public class TestPhysicsCar extends SimpleApplication implements ActionListener 
         float xOff = 1f;
         float zOff = 2f;
 
-        Cylinder wheelMesh = new Cylinder(16, 16, radius, radius * 0.6f, true);
+        float width = radius * 0.6f;
+        Cylinder wheelMesh = new Cylinder(16, 16, radius, width, true);
 
         Node node1 = new Node("wheel 1 node");
         Geometry wheels1 = new Geometry("wheel 1", wheelMesh);
@@ -181,34 +220,10 @@ public class TestPhysicsCar extends SimpleApplication implements ActionListener 
     }
 
     public void onAction(String binding, boolean value, float tpf) {
-        if (binding.equals("Lefts")) {
-            if (value) {
-                steeringValue += .5f;
-            } else {
-                steeringValue += -.5f;
-            }
-            vehicle.steer(steeringValue);
-        } else if (binding.equals("Rights")) {
-            if (value) {
-                steeringValue += -.5f;
-            } else {
-                steeringValue += .5f;
-            }
-            vehicle.steer(steeringValue);
-        } else if (binding.equals("Ups")) {
-            if (value) {
-                accelerationValue += accelerationForce;
-            } else {
-                accelerationValue -= accelerationForce;
-            }
-            vehicle.accelerate(accelerationValue);
-        } else if (binding.equals("Downs")) {
-            if (value) {
-                vehicle.brake(brakeForce);
-            } else {
-                vehicle.brake(0f);
-            }
-        } else if (binding.equals("Space")) {
+
+        log.info("binding=" + binding + ", value=" + value + ", tpf=" + tpf);
+
+        if (binding.equals("Space")) {
             if (value) {
                 vehicle.applyImpulse(jumpForce, Vector3f.ZERO);
             }
@@ -223,5 +238,29 @@ public class TestPhysicsCar extends SimpleApplication implements ActionListener 
             } else {
             }
         }
+    }
+
+    @Override
+    public void onAnalog(String binding, float value, float tpf) {
+
+        if (binding.equals("Lefts")) {
+            steeringValue = +0.5f * value / tpf;
+            vehicle.steer(steeringValue);
+        } else if (binding.equals("Rights")) {
+            steeringValue = -0.5f * value / tpf;
+            vehicle.steer(steeringValue);
+        } else if (binding.equals("Ups")) {
+            accelerationValue = accelerationForce * value / tpf;
+            vehicle.accelerate(accelerationValue);
+            vehicle.brake(0.0f);
+        } else if (binding.equals("Downs")) {
+            vehicle.accelerate(0.0f);
+            float brakeValue = brakeForce * value / tpf;
+            log.info("brakeValue=" + brakeValue);
+            vehicle.brake(brakeValue);
+        } else {
+            vehicle.brake(0.0f);
+        }
+
     }
 }

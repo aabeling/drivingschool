@@ -125,8 +125,6 @@ public class DrivingSchool extends SimpleApplication {
 
     private void initKeys() {
 
-        System.out.println(inputManager);
-
         inputManager.clearRawInputListeners();
 
         inputManager.addMapping("Left", new JoyAxisTrigger(
