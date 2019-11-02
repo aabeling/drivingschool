@@ -77,13 +77,9 @@ public class PhysicsTestHelper {
         Geometry floorGeometry = new Geometry("Floor", floorBox);
         floorGeometry.setMaterial(material);
         floorGeometry.setLocalTranslation(0, -5, 0);
-        // Plane plane = new Plane();
-        // plane.setOriginNormal(new Vector3f(0, 0.25f, 0), Vector3f.UNIT_Y);
-        // floorGeometry.addControl(new RigidBodyControl(new
-        // PlaneCollisionShape(plane), 0));
         floorGeometry.addControl(new RigidBodyControl(0));
-        rootNode.attachChild(floorGeometry);
-        space.add(floorGeometry);
+//        rootNode.attachChild(floorGeometry);
+//        space.add(floorGeometry);
 
         // movable boxes
         for (int i = 0; i < 12; i++) {

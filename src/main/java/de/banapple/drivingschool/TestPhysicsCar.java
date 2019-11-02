@@ -41,6 +41,7 @@ import com.jme3.bullet.collision.shapes.*;
 import com.jme3.bullet.control.*;
 import com.jme3.input.*;
 import com.jme3.input.controls.*;
+import com.jme3.light.*;
 import com.jme3.material.*;
 import com.jme3.math.*;
 import com.jme3.scene.*;
@@ -85,13 +86,19 @@ public class TestPhysicsCar
         
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
-        bulletAppState.setDebugEnabled(true);
+        bulletAppState.setDebugEnabled(false);
         PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
         
-//        assetManager.registerLoader(BlenderLoader.class, "blend");
-//        Spatial city = assetManager.loadModel("preetz.blend");
-//        city.setLocalTranslation(0, -5, 0);
-//        rootNode.attachChild(city);
+        Material mat = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.getAdditionalRenderState().setWireframe(false);
+        mat.setColor("Color", ColorRGBA.Green);
+        assetManager.registerLoader(BlenderLoader.class, "blend");
+        Spatial city = assetManager.loadModel("preetz.blend");
+//        city.setMaterial(mat);
+        city.setLocalTranslation(-10, -40, 0);
+        city.addControl(new RigidBodyControl(0));
+        bulletAppState.getPhysicsSpace().add(city);
+        rootNode.attachChild(city);
         
         setupKeys();
         buildPlayer();
@@ -175,7 +182,7 @@ public class TestPhysicsCar
 
     private void buildPlayer() {
         Material mat = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.getAdditionalRenderState().setWireframe(true);
+        mat.getAdditionalRenderState().setWireframe(false);
         mat.setColor("Color", ColorRGBA.Red);
 
         // create a compound shape and attach the BoxCollisionShape for the car
