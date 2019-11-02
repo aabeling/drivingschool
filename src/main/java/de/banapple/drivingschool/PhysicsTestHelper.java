@@ -73,7 +73,7 @@ public class PhysicsTestHelper {
         Material material = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         material.setTexture("ColorMap", assetManager.loadTexture("Interface/Logo/Monkey.jpg"));
 
-        Box floorBox = new Box(140, 0.25f, 140);
+        Box floorBox = new Box(140,0.25f,140);
         Geometry floorGeometry = new Geometry("Floor", floorBox);
         floorGeometry.setMaterial(material);
         floorGeometry.setLocalTranslation(0, -5, 0);

@@ -45,6 +45,7 @@ import com.jme3.material.*;
 import com.jme3.math.*;
 import com.jme3.scene.*;
 import com.jme3.scene.control.CameraControl.*;
+import com.jme3.scene.plugins.blender.*;
 import com.jme3.scene.shape.*;
 import com.jme3.system.*;
 
@@ -81,10 +82,17 @@ public class TestPhysicsCar
     @Override
     public void simpleInitApp() {
 
+        
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         bulletAppState.setDebugEnabled(true);
         PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
+        
+//        assetManager.registerLoader(BlenderLoader.class, "blend");
+//        Spatial city = assetManager.loadModel("preetz.blend");
+//        city.setLocalTranslation(0, -5, 0);
+//        rootNode.attachChild(city);
+        
         setupKeys();
         buildPlayer();
 
@@ -242,6 +250,7 @@ public class TestPhysicsCar
         vehicleNode.attachChild(node2);
         vehicleNode.attachChild(node3);
         vehicleNode.attachChild(node4);
+        
         rootNode.attachChild(vehicleNode);
 
         /* reduce rolling */
@@ -287,7 +296,7 @@ public class TestPhysicsCar
 
     private void setCamPositionChase() {
 
-        camNode.setLocalTranslation(new Vector3f(0, 2, -5));
+        camNode.setLocalTranslation(new Vector3f(0, 2, -10));
     }
 
     @Override
