@@ -33,7 +33,6 @@
 package de.banapple.drivingschool;
 
 import java.util.*;
-import java.util.logging.*;
 
 import com.jme3.app.*;
 import com.jme3.bullet.*;
@@ -41,6 +40,7 @@ import com.jme3.bullet.collision.shapes.*;
 import com.jme3.bullet.control.*;
 import com.jme3.input.*;
 import com.jme3.input.controls.*;
+import com.jme3.light.*;
 import com.jme3.material.*;
 import com.jme3.math.*;
 import com.jme3.scene.*;
@@ -52,8 +52,6 @@ import com.jme3.system.*;
 public class TestPhysicsCar
         extends SimpleApplication
         implements ActionListener, AnalogListener {
-
-    private static final Logger log = Logger.getLogger(TestPhysicsCar.class.getName());
 
     private BulletAppState bulletAppState;
     private VehicleControl vehicle;
@@ -82,38 +80,85 @@ public class TestPhysicsCar
     @Override
     public void simpleInitApp() {
 
-        
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         bulletAppState.setDebugEnabled(false);
+
+        AmbientLight light = new AmbientLight();
+        light.setColor(ColorRGBA.LightGray);
+        rootNode.addLight(light);
+
+        // PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager,
+        // bulletAppState.getPhysicsSpace());
+
+        // addMeshTestFloor();
+        // addBlenderModel();
         
-//        PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
-        
-        addMeshTestFloor();
-//        addBlenderModel();
-        
-        
+        addChessBoardFloor(100, 20f, bulletAppState.getPhysicsSpace());
+
         setupKeys();
         buildPlayer();
 
         useChaseNode();
     }
 
+    /**
+     * Creates a floor build of black and white tiles.
+     * 
+     * @param count
+     *            the number of tiles in each direction
+     * @param tileSize
+     *            the size of the tiles
+     */
+    void addChessBoardFloor(
+            int count,
+            float tileSize,
+            PhysicsSpace space) {
+
+        Material blackMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        blackMaterial.setColor("Color", ColorRGBA.Black);
+        Material whiteMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        whiteMaterial.setColor("Color", ColorRGBA.White);        
+
+        /* offset for the local translation to center the floor */
+        float offset = - count * tileSize / 2;
+
+        for (int i = 0; i < count; i++) {
+            for (int j = 0; j < count; j++) {
+                
+                Box tile = new Box(tileSize/2, 0.25f, tileSize/2);
+                Geometry tileGeometry = new Geometry("tile-" + i + "-" + j, tile);
+                if ((i + j) % 2 == 0) {
+                    tileGeometry.setMaterial(blackMaterial);
+                } else {
+                    tileGeometry.setMaterial(whiteMaterial);
+                }
+                tileGeometry.setLocalTranslation(
+                        offset + i * tileSize, 
+                        -5, 
+                        offset + j * tileSize);
+                tileGeometry.addControl(new RigidBodyControl(0));
+                rootNode.attachChild(tileGeometry);
+                space.add(tileGeometry);
+            }
+        }
+    }
+
     void addMeshTestFloor() {
-        
+
         Geometry floor = PhysicsTestHelper.createMeshTestFloor(assetManager, 100.0f, new Vector3f(-50, -1, -50));
         rootNode.attachChild(floor);
         bulletAppState.getPhysicsSpace().add(floor);
     }
-    
+
     /**
-     * Hiermit habe ich versucht, ein blender-model von Preetz darzustellen.
-     * Da Preetz über NN liegt, musste das city-Model nach unten verschoben werden,
-     * damit das Auto darauf landet. Ansonsten wäre das city-Model oberhalb
-     * des von PhysicsTestHelper.createPhysicsTestWorld erstellten Floors gewesen.
+     * Hiermit habe ich versucht, ein blender-model von Preetz darzustellen. Da
+     * Preetz über NN liegt, musste das city-Model nach unten verschoben werden,
+     * damit das Auto darauf landet. Ansonsten wäre das city-Model oberhalb des
+     * von PhysicsTestHelper.createPhysicsTestWorld erstellten Floors gewesen.
      */
     void addBlenderModel() {
-        
+
         Material mat = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.getAdditionalRenderState().setWireframe(false);
         mat.setColor("Color", ColorRGBA.Green);
@@ -125,7 +170,7 @@ public class TestPhysicsCar
         bulletAppState.getPhysicsSpace().add(city);
         rootNode.attachChild(city);
     }
-    
+
     void useChaseNode() {
 
         // Disable the default flyby cam
@@ -277,7 +322,7 @@ public class TestPhysicsCar
         vehicleNode.attachChild(node2);
         vehicleNode.attachChild(node3);
         vehicleNode.attachChild(node4);
-        
+
         rootNode.attachChild(vehicleNode);
 
         /* reduce rolling */
