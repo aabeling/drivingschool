@@ -32,8 +32,6 @@
 
 package de.banapple.drivingschool;
 
-import java.util.*;
-
 import com.jme3.app.*;
 import com.jme3.bullet.*;
 import com.jme3.bullet.collision.shapes.*;
@@ -48,6 +46,7 @@ import com.jme3.scene.control.CameraControl.*;
 import com.jme3.scene.plugins.blender.*;
 import com.jme3.scene.shape.*;
 import com.jme3.system.*;
+import com.jme3.util.*;
 
 public class TestPhysicsCar
         extends SimpleApplication
@@ -96,6 +95,12 @@ public class TestPhysicsCar
 
         addChessBoardFloor(100, 30f, bulletAppState.getPhysicsSpace());
 
+        /* https://wiki.jmonkeyengine.org/jme3/advanced/sky.html */
+        rootNode.attachChild(SkyFactory.createSky(
+                getAssetManager(),
+                "Textures/Sky/Bright/FullskiesBlueClear03.dds",
+                SkyFactory.EnvMapType.CubeMap));
+        
         setupKeys();
         buildPlayer();
 
@@ -366,7 +371,7 @@ public class TestPhysicsCar
 
     private void setCamPositionChase() {
 
-        camNode.setLocalTranslation(new Vector3f(0, 2, -10));
+        camNode.setLocalTranslation(new Vector3f(0, 3, -10));
     }
 
     @Override
