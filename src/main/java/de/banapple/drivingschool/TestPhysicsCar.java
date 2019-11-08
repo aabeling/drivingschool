@@ -93,7 +93,7 @@ public class TestPhysicsCar
 
         // addMeshTestFloor();
         // addBlenderModel();
-        
+
         addChessBoardFloor(100, 20f, bulletAppState.getPhysicsSpace());
 
         setupKeys();
@@ -118,15 +118,15 @@ public class TestPhysicsCar
         Material blackMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         blackMaterial.setColor("Color", ColorRGBA.Black);
         Material whiteMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        whiteMaterial.setColor("Color", ColorRGBA.White);        
+        whiteMaterial.setColor("Color", ColorRGBA.White);
 
         /* offset for the local translation to center the floor */
-        float offset = - count * tileSize / 2;
+        float offset = -count * tileSize / 2;
 
         for (int i = 0; i < count; i++) {
             for (int j = 0; j < count; j++) {
-                
-                Box tile = new Box(tileSize/2, 0.25f, tileSize/2);
+
+                Box tile = new Box(tileSize / 2, 0.25f, tileSize / 2);
                 Geometry tileGeometry = new Geometry("tile-" + i + "-" + j, tile);
                 if ((i + j) % 2 == 0) {
                     tileGeometry.setMaterial(blackMaterial);
@@ -134,8 +134,8 @@ public class TestPhysicsCar
                     tileGeometry.setMaterial(whiteMaterial);
                 }
                 tileGeometry.setLocalTranslation(
-                        offset + i * tileSize, 
-                        -5, 
+                        offset + i * tileSize,
+                        -5,
                         offset + j * tileSize);
                 tileGeometry.addControl(new RigidBodyControl(0));
                 rootNode.attachChild(tileGeometry);
@@ -207,7 +207,7 @@ public class TestPhysicsCar
         if (joysticks == null) {
             throw new IllegalStateException("Cannot find any joysticks!");
         }
-        Arrays.asList(joysticks).forEach(j -> System.out.println(j));
+        Arrays.asList(joysticks).forEach(j -> System.out.println(j.getXAxis().getDeadZone()));
         if (joysticks.length != 1) {
             throw new IllegalStateException("more than one joystick");
         }
@@ -375,11 +375,9 @@ public class TestPhysicsCar
     public void onAnalog(String binding, float value, float tpf) {
 
         if (binding.equals("Lefts")) {
-            steeringValue = +0.5f * value / tpf;
-            vehicle.steer(steeringValue);
+            steer(+1, value, tpf);
         } else if (binding.equals("Rights")) {
-            steeringValue = -0.5f * value / tpf;
-            vehicle.steer(steeringValue);
+            steer(-1, value, tpf);
         } else if (binding.equals("Ups")) {
             accelerationValue = accelerationForce * value / tpf;
             vehicle.accelerate(accelerationValue);
@@ -392,5 +390,17 @@ public class TestPhysicsCar
             vehicle.brake(0.0f);
         }
 
+    }
+    
+    private void steer(int direction, float value, float tpf) {
+        
+        float relativeValue = value / tpf;
+        System.out.println(relativeValue);
+        if (relativeValue < 0.1) {
+            vehicle.steer(0.0f);
+        } else {
+            steeringValue = direction * 0.5f * relativeValue;
+            vehicle.steer(steeringValue);
+        }
     }
 }
