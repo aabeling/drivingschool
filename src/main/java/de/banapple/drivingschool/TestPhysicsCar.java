@@ -94,7 +94,7 @@ public class TestPhysicsCar
         // addMeshTestFloor();
         // addBlenderModel();
 
-        addChessBoardFloor(100, 20f, bulletAppState.getPhysicsSpace());
+        addChessBoardFloor(100, 30f, bulletAppState.getPhysicsSpace());
 
         setupKeys();
         buildPlayer();
@@ -207,7 +207,6 @@ public class TestPhysicsCar
         if (joysticks == null) {
             throw new IllegalStateException("Cannot find any joysticks!");
         }
-        Arrays.asList(joysticks).forEach(j -> System.out.println(j.getXAxis().getDeadZone()));
         if (joysticks.length != 1) {
             throw new IllegalStateException("more than one joystick");
         }
@@ -347,7 +346,6 @@ public class TestPhysicsCar
             }
         } else if (binding.equals("Reset")) {
             if (value) {
-                System.out.println("Reset");
                 vehicle.setPhysicsLocation(Vector3f.ZERO);
                 vehicle.setPhysicsRotation(new Matrix3f());
                 vehicle.setLinearVelocity(Vector3f.ZERO);
