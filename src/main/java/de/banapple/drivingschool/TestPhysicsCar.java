@@ -115,10 +115,10 @@ public class TestPhysicsCar
             float tileSize,
             PhysicsSpace space) {
 
-        Material blackMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        blackMaterial.setColor("Color", ColorRGBA.Black);
-        Material whiteMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        whiteMaterial.setColor("Color", ColorRGBA.White);
+        Material mat1 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat1.setColor("Color", ColorRGBA.Gray);
+        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.LightGray);
 
         /* offset for the local translation to center the floor */
         float offset = -count * tileSize / 2;
@@ -129,9 +129,9 @@ public class TestPhysicsCar
                 Box tile = new Box(tileSize / 2, 0.25f, tileSize / 2);
                 Geometry tileGeometry = new Geometry("tile-" + i + "-" + j, tile);
                 if ((i + j) % 2 == 0) {
-                    tileGeometry.setMaterial(blackMaterial);
+                    tileGeometry.setMaterial(mat1);
                 } else {
-                    tileGeometry.setMaterial(whiteMaterial);
+                    tileGeometry.setMaterial(mat2);
                 }
                 tileGeometry.setLocalTranslation(
                         offset + i * tileSize,
@@ -327,7 +327,7 @@ public class TestPhysicsCar
 
         /* reduce rolling */
         for (int wheel = 0; wheel < vehicle.getNumWheels(); wheel++) {
-            vehicle.setRollInfluence(wheel, 0.3f);
+            vehicle.setRollInfluence(wheel, 0.0f);
         }
 
         getPhysicsSpace().add(vehicle);
@@ -391,16 +391,16 @@ public class TestPhysicsCar
         }
 
     }
-    
+
     private void steer(int direction, float value, float tpf) {
-        
+
         float relativeValue = value / tpf;
-        System.out.println(relativeValue);
-        if (relativeValue < 0.1) {
-            vehicle.steer(0.0f);
-        } else {
-            steeringValue = direction * 0.5f * relativeValue;
-            vehicle.steer(steeringValue);
-        }
+        /*
+         * reduce effect of small values 
+         */
+        relativeValue = relativeValue * relativeValue * relativeValue;
+        steeringValue = direction * 0.6f * relativeValue;
+        vehicle.steer(steeringValue);
+
     }
 }
