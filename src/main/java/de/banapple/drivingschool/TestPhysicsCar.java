@@ -41,7 +41,6 @@ import com.jme3.bullet.collision.shapes.*;
 import com.jme3.bullet.control.*;
 import com.jme3.input.*;
 import com.jme3.input.controls.*;
-import com.jme3.light.*;
 import com.jme3.material.*;
 import com.jme3.math.*;
 import com.jme3.scene.*;
@@ -87,18 +86,12 @@ public class TestPhysicsCar
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         bulletAppState.setDebugEnabled(false);
-        PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
         
-        Material mat = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.getAdditionalRenderState().setWireframe(false);
-        mat.setColor("Color", ColorRGBA.Green);
-        assetManager.registerLoader(BlenderLoader.class, "blend");
-        Spatial city = assetManager.loadModel("preetz.blend");
-//        city.setMaterial(mat);
-        city.setLocalTranslation(-10, -40, 0);
-        city.addControl(new RigidBodyControl(0));
-        bulletAppState.getPhysicsSpace().add(city);
-        rootNode.attachChild(city);
+//        PhysicsTestHelper.createPhysicsTestWorld(rootNode, assetManager, bulletAppState.getPhysicsSpace());
+        
+        addMeshTestFloor();
+//        addBlenderModel();
+        
         
         setupKeys();
         buildPlayer();
@@ -106,6 +99,33 @@ public class TestPhysicsCar
         useChaseNode();
     }
 
+    void addMeshTestFloor() {
+        
+        Geometry floor = PhysicsTestHelper.createMeshTestFloor(assetManager, 100.0f, new Vector3f(-50, -1, -50));
+        rootNode.attachChild(floor);
+        bulletAppState.getPhysicsSpace().add(floor);
+    }
+    
+    /**
+     * Hiermit habe ich versucht, ein blender-model von Preetz darzustellen.
+     * Da Preetz über NN liegt, musste das city-Model nach unten verschoben werden,
+     * damit das Auto darauf landet. Ansonsten wäre das city-Model oberhalb
+     * des von PhysicsTestHelper.createPhysicsTestWorld erstellten Floors gewesen.
+     */
+    void addBlenderModel() {
+        
+        Material mat = new Material(getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.getAdditionalRenderState().setWireframe(false);
+        mat.setColor("Color", ColorRGBA.Green);
+        assetManager.registerLoader(BlenderLoader.class, "blend");
+        Spatial city = assetManager.loadModel("preetz.blend");
+        city.setMaterial(mat);
+        city.setLocalTranslation(-10, -40, 0);
+        city.addControl(new RigidBodyControl(0));
+        bulletAppState.getPhysicsSpace().add(city);
+        rootNode.attachChild(city);
+    }
+    
     void useChaseNode() {
 
         // Disable the default flyby cam
