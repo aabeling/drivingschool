@@ -100,11 +100,12 @@ public class TestPhysicsCar
                 getAssetManager(),
                 "Textures/Sky/Bright/FullskiesBlueClear03.dds",
                 SkyFactory.EnvMapType.CubeMap));
-        
+
         setupKeys();
         buildPlayer();
 
         useChaseNode();
+        // useChaseCamera();
     }
 
     /**
@@ -186,10 +187,9 @@ public class TestPhysicsCar
         camNode.setControlDir(ControlDirection.SpatialToCamera);
         // Attach the camNode to the target:
         vehicleNode.attachChild(camNode);
-        // Move camNode, e.g. behind and above the target:
+
         setCamPositionChase();
-        // Rotate the camNode to look at the target:
-        camNode.lookAt(vehicleNode.getLocalTranslation(), Vector3f.UNIT_Y);
+
     }
 
     void useChaseCamera() {
@@ -367,6 +367,7 @@ public class TestPhysicsCar
     private void setCamPositionDriver() {
 
         camNode.setLocalTranslation(new Vector3f(0.4f, 1.5f, -0.5f));
+
     }
 
     private void setCamPositionChase() {
@@ -399,7 +400,7 @@ public class TestPhysicsCar
 
         float relativeValue = value / tpf;
         /*
-         * reduce effect of small values 
+         * reduce effect of small values
          */
         relativeValue = relativeValue * relativeValue * relativeValue;
         steeringValue = direction * 0.6f * relativeValue;
